@@ -2,7 +2,7 @@
 
 Claude Code (CLI) kit for surveying a codebase on a limited usage budget.
 
-Current scope (v0.4)
+Current scope (v0.5)
 
 **Start in a mode** (models are fixed at start)
 
@@ -16,7 +16,7 @@ Arguments after the mode go to `claude` (`code-survey eco -p "..."`). Plain `cla
 the modes before the first prompt; `claude -p` without a mode is refused.
 
 **Survey on Haiku**
-- `code-survey:survey` skill: the main session plans and combines, subagents read
+- `code-survey:survey` skill: the main session plans and combines, subagents read, and `survey/<date>/report.html` is built automatically (awesome-design-skills design, no model tokens)
 - `code-survey:surveyor` (Haiku, low effort): reads one module, writes a JSON note; a hook rejects notes that miss required keys
 - `code-survey:locator` (Haiku): returns `file:line` locations only
 - Guards: subagents stop reading above 80k prompt tokens (Haiku costs 5x above 100k); whole reads of files over 400 lines are refused; config keys are checked for actual use
@@ -27,7 +27,7 @@ the modes before the first prompt; `claude -p` without a mode is refused.
 - Subagent rows: type, model, tokens, spend, and cache hit rate per subagent
 - Hooks: one log line per subagent and per session (tokens, cache hit rate, spend) for the next review cycle
 
-Planned: HTML report renderer, usage review skill.
+Planned: usage review skill, coding agents.
 
 Install the log hooks (Claude Code 2.1.275 or later):
 

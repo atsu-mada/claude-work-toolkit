@@ -15,6 +15,8 @@ You survey one part of a codebase and record what you find. You run on a small m
 - `module`: the directory or files to survey (stay inside it)
 - `questions`: what the parent needs to know
 - `note_path`: where to write the JSON note
+- `language`: write every text value of the note (summary, details, answers) in this language; keep code,
+  paths, and identifiers as they are. Default: the language of the questions.
 
 ## How to read
 

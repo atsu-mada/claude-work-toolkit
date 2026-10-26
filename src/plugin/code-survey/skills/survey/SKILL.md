@@ -31,6 +31,7 @@ module: <path>
 questions:
 - ...
 note_path: survey/<date>/notes/<module-slug>.json
+language: <the language the user writes in, e.g. Japanese>
 ```
 
 - Run independent modules in parallel, at most 4 at a time.
@@ -42,16 +43,30 @@ note_path: survey/<date>/notes/<module-slug>.json
 ## 3. Combine (main session)
 
 1. Read the notes (they are short JSON).
-2. Write `survey/<date>/summary.json`:
+2. Write `survey/<date>/summary.json` (text in the user's language):
    `{"repository": "", "date": "", "overview": "", "modules": [{"slug": "", "summary": ""}],
    "cross_module": [{"from": "", "to": "", "how": ""}], "risks": [""], "open_questions": [""]}`
 3. If a note has `open_questions` that block the user's question, send one more surveyor call for just
    those questions. Do not re-read whole modules.
 
-## 4. Report
+## 4. HTML report
 
-Tell the user the overview in a few lines and where the notes and summary are. The HTML report is built
-from these files by a script, so do not write HTML yourself.
+A hook builds `report.html` automatically every time `summary.json` is written (no model tokens; the
+design follows the awesome-design-skills system). Run the script yourself only to add options or when the
+hook reported a failure:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/scripts/render_report.py" survey/<date>
+```
+
+- It writes `survey/<date>/report.html` from `summary.json` and `notes/*.json`.
+- Add `--source-url https://<host>/<org>/<repo>/blob/<branch>/` to turn every `file:line` into a link.
+- Do not write or edit the report HTML yourself. If the user wants a different layout or another HTML
+  page, invoke `/awesome-design-skills` first and follow it, then change the script, not one report.
+
+## 5. Tell the user
+
+Give the overview in a few lines and the path of `report.html`, plus the notes folder.
 
 ## Budget rules
 

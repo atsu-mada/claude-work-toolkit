@@ -43,6 +43,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/survey/auto_report.py\"",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "SessionStart": [
