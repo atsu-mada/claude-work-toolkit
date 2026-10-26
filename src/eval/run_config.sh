@@ -14,13 +14,13 @@ OUT=$KIT/data/eval/$RUN/$CFG
 mkdir -p "$OUT/survey" "$OUT/logs"
 
 case $CFG in
-  A) MAIN=sonnet; SUB=sonnet ;;
-  B) MAIN=sonnet; SUB=haiku ;;
-  C) MAIN=haiku;  SUB=haiku ;;
+  A) MAIN=sonnet; SUB=sonnet; MODE=eval-all-sonnet ;;
+  B) MAIN=sonnet; SUB=haiku;  MODE=balanced ;;
+  C) MAIN=haiku;  SUB=haiku;  MODE=eco ;;
   *) echo "unknown config $CFG" >&2; exit 2 ;;
 esac
 SETTINGS=$OUT/settings.json
-printf '{"env":{"CLAUDE_CODE_SUBAGENT_MODEL":"%s","CLAUDE_CODE_SUBAGENT_MODEL_FORCE":"1"}}\n' "$SUB" > "$SETTINGS"
+printf '{"env":{"CLAUDE_CODE_SUBAGENT_MODEL":"%s","CLAUDE_CODE_SUBAGENT_MODEL_FORCE":"1","CODE_SURVEY_MODE":"%s"}}\n' "$SUB" "$MODE" > "$SETTINGS"
 export CODE_SURVEY_STATE_DIR=$OUT/state CODE_SURVEY_LOG_DIR=$OUT/logs
 
 # survey
@@ -30,7 +30,8 @@ SURVEY_PROMPT=$(sed "s|OUTDIR|$OUT/survey|g" "$KIT/src/eval/survey_task.md")
   --allowedTools "Agent,Glob,Grep,Read,Write($OUT/survey/**),Bash(git ls-files*),Skill" \
   --output-format json "$SURVEY_PROMPT" > "$OUT/survey_result.json" 2> "$OUT/survey_stderr.txt")
 
-# dev
+# dev (skip with SKIP_DEV=1)
+[ "${SKIP_DEV:-0}" = 1 ] && { echo "done $CFG (survey only) -> $OUT"; exit 0; }
 git clone -q --branch develop "$KIT" "$OUT/dev-repo"
 cp "$KIT/src/eval/dev_task/SPEC.md" "$OUT/dev-repo/TASK.md"
 (cd "$OUT/dev-repo" && CODE_SURVEY_LABEL=dev-$CFG claude -p --model $MAIN --settings "$SETTINGS" \

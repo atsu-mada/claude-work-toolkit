@@ -14,7 +14,9 @@ Never read source files in the main session beyond a quick look at the top-level
 2. Split the code into 3 to 8 modules of similar size. A module is a directory or a group of files that
    one reader can cover in about 80,000 tokens.
 3. For each module write 2 to 5 concrete questions (what it does, its entry points, how it talks to the
-   other modules, anything the user asked about).
+   other modules, anything the user asked about). For a module with configuration files, always ask
+   "which keys are read by the code, which are defined but unused, and which are overridden by
+   hardcoded values".
 4. Choose the output folder: `survey/<YYYY-MM-DD>/` in the repository unless the user names another place.
 
 Small repositories (under about 30 files or 3,000 lines): skip the subagents and read directly.

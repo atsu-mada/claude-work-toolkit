@@ -81,6 +81,7 @@ Then run a survey: `/code-survey:survey` or ask "survey this repository with the
 | `CODE_SURVEY_USDJPY` | fetched once a day | Fixed USD to JPY rate; `0` shows dollars |
 | `CODE_SURVEY_NO_FX` | unset | `1` disables the rate fetch (dollars shown) |
 | `CODE_SURVEY_PRICING` | plugin `config/pricing.json` | Another pricing table |
+| `CODE_SURVEY_SUBAGENT_PROMPT_LIMIT` | `80000` | Reading budget per subagent request (prompt tokens); `0` turns it off |
 
 ## Company machines
 

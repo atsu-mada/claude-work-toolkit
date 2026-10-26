@@ -1,7 +1,7 @@
 """Status line for the parent session: spend of parent and subagents, cache, context.
 
 Claude Code runs this with the session JSON on stdin and shows what it prints.
-Example:  ¥128（親 ¥81 · サブ ¥47・3体）｜キャッシュ 親93% サブ71% 残42分｜ctx 34%｜Sonnet 5.5
+Example:  [eco]｜¥128（親 ¥81 · サブ ¥47・3体）｜キャッシュ 親93% サブ71% 残42分｜ctx 34%｜Sonnet 5.5
 
 It also saves the official prompt_cache and cost fields to the state folder, so
 the log hook can record cache misses and their causes at the end of the session.
@@ -10,6 +10,7 @@ the log hook can record cache misses and their causes at the end of the session.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -44,12 +45,18 @@ def cache_part(payload: dict, summary: dict) -> str:
     return text
 
 
+def mode_part() -> str:
+    """Mode set by `code-survey <mode>` (CODE_SURVEY_MODE), shown first."""
+    mode = os.environ.get("CODE_SURVEY_MODE", "").strip()
+    return f"[{mode}]" if mode else "[モードなし]"
+
+
 def render(payload: dict) -> str:
     transcript = payload.get("transcript_path") or ""
     session_id = payload.get("session_id") or ""
     summary = core.summarize(transcript, session_id) if transcript else None
     rate = core.usd_jpy()
-    parts = []
+    parts = [mode_part()]
     if summary:
         main_usd = summary["main"]["all"]["usd"]
         sub_usd = summary["sub"]["all"]["usd"]

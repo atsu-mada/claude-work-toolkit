@@ -33,7 +33,7 @@ def menu(modes: dict) -> str:
 def decide(payload: dict, env: dict, state_dir: Path):
     """Return the hook output dict, or None to let the prompt through."""
     modes = mode_lib.load()
-    if mode_lib.resolve(env.get(mode_lib.ENV_MODE, ""), modes):
+    if env.get(mode_lib.ENV_MODE, "").strip():  # any explicit mode, including custom ones (e.g. eval runs)
         return None
     if non_interactive(env):
         return {"decision": "block",

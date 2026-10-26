@@ -66,6 +66,18 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/survey/read_budget.py\"",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }
