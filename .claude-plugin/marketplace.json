@@ -1,0 +1,11 @@
+{
+  "name": "code-survey-kit",
+  "owner": { "name": "code-survey-kit" },
+  "plugins": [
+    {
+      "name": "code-survey",
+      "source": "./src/plugin/code-survey",
+      "description": "Usage logging (tokens, cache hit rate, API-equivalent cost) for parent and subagents."
+    }
+  ]
+}

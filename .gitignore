@@ -1,0 +1,16 @@
+# generated data and runtime logs (see docs/decisions/ for exceptions)
+data/*
+!data/logs/
+data/logs/*
+!data/logs/.gitkeep
+# local settings and personal files
+*.local.json
+.claude/settings.local.json
+CLAUDE.local.md
+# Python / OS / IDE
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+.vscode/
+.idea/
