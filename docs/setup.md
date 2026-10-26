@@ -70,6 +70,17 @@ Paste [config/templates/CLAUDE.survey.md](../config/templates/CLAUDE.survey.md) 
 repository you survey (or into `~/.claude/CLAUDE.md`).
 
 Then run a survey: `/code-survey:survey` or ask "survey this repository with the code-survey skill".
+The result is `survey/<date>/report.html` (one self-contained page; open it in a browser) next to
+`summary.json` and `notes/`. A hook rebuilds the page whenever `summary.json` is written. To rebuild by hand
+or add source links:
+
+```bash
+python3 ~/code-survey-kit/src/plugin/code-survey/skills/survey/scripts/render_report.py survey/<date> \
+  --source-url https://github.com/<org>/<repo>/blob/main/
+```
+
+Any other HTML (a different report layout, extra pages) is made with `/awesome-design-skills`, which must be
+installed on the machine.
 
 ## 6. Optional environment variables
 

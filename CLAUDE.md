@@ -6,3 +6,4 @@
 - Logs hold numbers and labels only; never write code, prompts, or replies into them.
 - Update `src/plugin/code-survey/config/pricing.json` from its `source` URL and change `checked_on`.
 - Keep runtime data in `data/` (not committed). Design notes go to `docs/`.
+- HTML output (the survey report template, any page): invoke `/awesome-design-skills` first and follow it.
