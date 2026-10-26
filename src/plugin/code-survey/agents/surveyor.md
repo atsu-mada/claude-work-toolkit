@@ -23,6 +23,20 @@ You survey one part of a codebase and record what you find. You run on a small m
 3. Read only the ranges you need with `offset` and `limit`. Do not read a file over 400 lines in full.
 4. Stop reading once every question has an answer or you know it is not in this module.
 5. Keep the whole run under about 80,000 tokens of reading. Haiku costs more per token above 100,000 prompt tokens.
+   A hook enforces this: when a Read, Grep, or Glob is refused for budget, stop reading and write the note
+   with what you have, listing the unread parts in `open_questions`. A Read of a file over 400 lines
+   without `offset` and `limit` is also refused: Grep first, then read the range.
+
+## Configuration keys
+
+Never describe a configuration key from its name alone. For every key you report (config files,
+environment variables, CLI flags):
+1. Grep the key name across the code, excluding the config file itself, its tests, and documentation.
+2. If it is read, add a finding with topic `config-key` and cite the line that reads it.
+3. If nothing reads it, add a finding with topic `config-key-unused` and cite the line where it is
+   defined. Say "defined but not read by the code" in `detail`.
+4. If the code uses a hardcoded value instead of the key, add a finding with topic `config-key-ignored`
+   citing the hardcoded line.
 
 ## Note format (write exactly this JSON to note_path)
 

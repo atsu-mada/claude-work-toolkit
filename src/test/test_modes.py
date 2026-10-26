@@ -141,3 +141,71 @@ class InstallLauncherTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StatuslineModeTests(unittest.TestCase):
+    def test_mode_shown_first(self):
+        sys.path.insert(0, str(REPO / "src" / "plugin" / "code-survey" / "scripts" / "usage"))
+        import statusline
+        old = os.environ.get("CODE_SURVEY_MODE")
+        try:
+            os.environ["CODE_SURVEY_MODE"] = "balanced"
+            self.assertTrue(statusline.render({}).startswith("[balanced]"))
+            del os.environ["CODE_SURVEY_MODE"]
+            self.assertTrue(statusline.render({}).startswith("[モードなし]"))
+        finally:
+            if old is not None:
+                os.environ["CODE_SURVEY_MODE"] = old
+
+
+class ReadBudgetTests(unittest.TestCase):
+    def setUp(self):
+        sys.path.insert(0, str(REPO / "src" / "plugin" / "code-survey" / "scripts" / "survey"))
+        import read_budget
+        self.rb = read_budget
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.transcript = root / "sess.jsonl"
+        self.transcript.write_text("")
+        subs = root / "sess" / "subagents"
+        subs.mkdir(parents=True)
+        self.agent_file = subs / "agent-a1.jsonl"
+        self.big = root / "big.py"
+        self.big.write_text("x = 1\n" * 500)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def usage(self, prompt):
+        self.agent_file.write_text(json.dumps({"type": "assistant", "message": {"id": "m", "usage": {
+            "input_tokens": 10, "cache_read_input_tokens": prompt - 10,
+            "cache_creation_input_tokens": 0}}}) + "\n")
+
+    def call(self, tool="Grep", agent="code-survey:surveyor", tool_input=None, env=None):
+        payload = {"agent_id": "a1", "agent_type": agent, "tool_name": tool,
+                   "transcript_path": str(self.transcript), "tool_input": tool_input or {}}
+        return self.rb.decide(payload, env or {})
+
+    def test_main_session_is_never_limited(self):
+        self.usage(500_000)
+        payload = {"tool_name": "Read", "transcript_path": str(self.transcript),
+                   "tool_input": {"file_path": str(self.big)}}
+        self.assertIsNone(self.rb.decide(payload, {}))
+
+    def test_budget(self):
+        self.usage(50_000)
+        self.assertIsNone(self.call())
+        self.usage(90_000)
+        out = self.call(agent="Explore")
+        self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "deny")
+        self.assertIn("Reading budget reached", out["hookSpecificOutput"]["permissionDecisionReason"])
+        self.assertIsNone(self.call(env={"CODE_SURVEY_SUBAGENT_PROMPT_LIMIT": "0"}))
+        self.assertIsNone(self.call(env={"CODE_SURVEY_SUBAGENT_PROMPT_LIMIT": "100000"}))
+
+    def test_whole_file_read(self):
+        self.usage(1_000)
+        whole = self.call("Read", tool_input={"file_path": str(self.big)})
+        self.assertIn("500 lines", whole["hookSpecificOutput"]["permissionDecisionReason"])
+        self.assertIsNone(self.call("Read", tool_input={"file_path": str(self.big), "offset": 1,
+                                                        "limit": 100}))
+        self.assertIsNone(self.call("Read", agent="Explore", tool_input={"file_path": str(self.big)}))

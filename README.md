@@ -2,7 +2,7 @@
 
 Claude Code (CLI) kit for surveying a codebase on a limited usage budget.
 
-Current scope (v0.3)
+Current scope (v0.4)
 
 **Start in a mode** (models are fixed at start)
 
@@ -19,6 +19,7 @@ the modes before the first prompt; `claude -p` without a mode is refused.
 - `code-survey:survey` skill: the main session plans and combines, subagents read
 - `code-survey:surveyor` (Haiku, low effort): reads one module, writes a JSON note; a hook rejects notes that miss required keys
 - `code-survey:locator` (Haiku): returns `file:line` locations only
+- Guards: subagents stop reading above 80k prompt tokens (Haiku costs 5x above 100k); whole reads of files over 400 lines are refused; config keys are checked for actual use
 - `install.py --profile haiku-subagents | haiku-all`: fixed routing in a settings file, for use without the launcher
 
 **Usage display and logging**
