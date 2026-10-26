@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import shutil
 import sys
@@ -50,6 +51,35 @@ PROFILES = {
     "haiku-subagents": {"env": SUBAGENT_ENV},
     "haiku-all": {"env": SUBAGENT_ENV, "model": "haiku"},
 }
+
+
+LAUNCHER = REPO / "src" / "launcher" / "code_survey.py"
+
+
+def link_launcher(bin_dir: Path, dry_run: bool, uninstall: bool) -> None:
+    """Symlink <bin_dir>/code-survey to the launcher script (or remove our link)."""
+    link = bin_dir / "code-survey"
+    if uninstall:
+        if link.is_symlink() and link.resolve() == LAUNCHER.resolve():
+            if not dry_run:
+                link.unlink()
+            print(f"removed: {link}")
+        return
+    if link.exists() or link.is_symlink():
+        if link.is_symlink() and link.resolve() == LAUNCHER.resolve():
+            print(f"launcher already linked: {link}")
+            return
+        print(f"skip launcher: {link} exists and is not ours", file=sys.stderr)
+        return
+    if dry_run:
+        print(f"would link: {link} -> {LAUNCHER}")
+        return
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    LAUNCHER.chmod(LAUNCHER.stat().st_mode | 0o111)
+    link.symlink_to(LAUNCHER)
+    print(f"linked: {link} -> {LAUNCHER}")
+    if str(bin_dir) not in os.environ.get("PATH", "").split(os.pathsep):
+        print(f"note: add {bin_dir} to PATH to run `code-survey`", file=sys.stderr)
 
 
 def apply_profile(settings: dict, name: str) -> dict:
@@ -96,7 +126,13 @@ def main() -> int:
                              "haiku-all (main session on Haiku too)")
     parser.add_argument("--no-statusline", action="store_true",
                         help="leave statusLine and subagentStatusLine untouched")
+    parser.add_argument("--launcher", action="store_true",
+                        help="link the `code-survey` command into --bin-dir")
+    parser.add_argument("--bin-dir", default=str(Path.home() / ".local" / "bin"))
     args = parser.parse_args()
+
+    if args.launcher:
+        link_launcher(Path(args.bin_dir).expanduser(), args.dry_run, args.uninstall)
 
     target = Path(args.target).expanduser()
     settings = {}

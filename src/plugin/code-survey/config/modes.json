@@ -1,0 +1,19 @@
+{
+  "_doc": "Model modes chosen at start. Rename a mode here; launcher, hook, and docs read this file.",
+  "modes": {
+    "eco": {
+      "title": "エコ（全部Haiku）",
+      "summary": "Main session and every subagent on Haiku. About 8-15x cheaper; use for most surveys and routine development.",
+      "model": "haiku",
+      "subagent_model": "haiku",
+      "aliases": ["c", "haiku", "economy"]
+    },
+    "balanced": {
+      "title": "バランス（親Sonnet・子Haiku）",
+      "summary": "Main session on Sonnet for planning and judgment, every subagent on Haiku for reading.",
+      "model": "sonnet",
+      "subagent_model": "haiku",
+      "aliases": ["b", "sonnet-haiku", "standard"]
+    }
+  }
+}
