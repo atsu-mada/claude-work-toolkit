@@ -30,7 +30,26 @@ Options: `--target <file>` for another settings file, `--python <path>`, `--refr
 `--force` to replace another status line, `--uninstall` to remove ours.
 The status line scripts run from the cloned folder, so keep it in place.
 
-## 4. Put subagents on Haiku
+## 4. Install the `code-survey` command (modes)
+
+```bash
+python3 ~/code-survey-kit/src/setup/install.py --launcher --no-statusline   # links ~/.local/bin/code-survey
+code-survey --list
+```
+
+| Mode | Aliases | Main session | Subagents | Use for |
+| --- | --- | --- | --- | --- |
+| `eco` (エコ) | `c`, `haiku`, `economy` | Haiku | Haiku | most surveys and routine development |
+| `balanced` (バランス) | `b`, `sonnet-haiku`, `standard` | Sonnet | Haiku | design decisions, risky changes, final reviews |
+
+- `code-survey` with no mode asks in the terminal (no default). Without a terminal it exits with code 2.
+- The mode is passed with `--model` and `--settings` (env `CLAUDE_CODE_SUBAGENT_MODEL`, `..._FORCE=1`,
+  `CODE_SURVEY_MODE`), so nothing is written to your settings files. Logs record the mode.
+- Plain `claude` with the plugin: the first prompt is held once and the modes are shown; send it again to
+  continue without a mode. `claude -p` without a mode is refused.
+- Rename or add modes in `src/plugin/code-survey/config/modes.json`.
+
+## 5. Fixed routing without the launcher (optional)
 
 A plugin cannot set environment variables, so the routing goes into a settings file:
 
@@ -52,7 +71,7 @@ repository you survey (or into `~/.claude/CLAUDE.md`).
 
 Then run a survey: `/code-survey:survey` or ask "survey this repository with the code-survey skill".
 
-## 5. Optional environment variables
+## 6. Optional environment variables
 
 | Variable | Default | Use |
 | --- | --- | --- |

@@ -60,6 +60,7 @@ def base(payload: dict) -> dict:
         "project": os.path.basename(cwd.rstrip("/")) if cwd else "",
         "git_head": git_head(cwd),
         "label": os.environ.get("CODE_SURVEY_LABEL", ""),
+        "mode": os.environ.get("CODE_SURVEY_MODE", ""),
     }
 
 

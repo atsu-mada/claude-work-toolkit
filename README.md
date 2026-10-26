@@ -2,13 +2,24 @@
 
 Claude Code (CLI) kit for surveying a codebase on a limited usage budget.
 
-Current scope (v0.2)
+Current scope (v0.3)
+
+**Start in a mode** (models are fixed at start)
+
+```bash
+code-survey eco        # エコ: main session and subagents on Haiku (default choice for most work)
+code-survey balanced   # バランス: main session on Sonnet, subagents on Haiku
+code-survey            # asks which mode first
+```
+
+Arguments after the mode go to `claude` (`code-survey eco -p "..."`). Plain `claude` with the plugin shows
+the modes before the first prompt; `claude -p` without a mode is refused.
 
 **Survey on Haiku**
 - `code-survey:survey` skill: the main session plans and combines, subagents read
 - `code-survey:surveyor` (Haiku, low effort): reads one module, writes a JSON note; a hook rejects notes that miss required keys
 - `code-survey:locator` (Haiku): returns `file:line` locations only
-- `install.py --profile haiku-subagents | haiku-all`: puts every subagent (and optionally the main session) on Haiku
+- `install.py --profile haiku-subagents | haiku-all`: fixed routing in a settings file, for use without the launcher
 
 **Usage display and logging**
 - Status line: API-equivalent spend of the parent session and its subagents, cache hit rate, context use
