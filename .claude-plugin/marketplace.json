@@ -1,11 +1,14 @@
 {
   "name": "code-survey-kit",
-  "owner": { "name": "code-survey-kit" },
+  "owner": {
+    "name": "code-survey-kit"
+  },
+  "description": "Claude Code CLI kit for low-cost code surveys: Haiku subagents and token / cache-hit logging.",
   "plugins": [
     {
       "name": "code-survey",
       "source": "./src/plugin/code-survey",
-      "description": "Usage logging (tokens, cache hit rate, API-equivalent cost) for parent and subagents."
+      "description": "Haiku survey subagents and skill, plus usage logging (tokens, cache hit rate, API-equivalent cost)."
     }
   ]
 }

@@ -14,6 +14,8 @@ the last one is used. The on-disk format is not formally documented; `src/test/`
 - **Cache hit rate**: cache reads / (uncached input + cache reads + cache writes). Same definition as the
   status line's `prompt_cache.hit_ratio`, which covers the parent only; the kit adds the subagents.
 - **Sub share**: subagent spend / total spend.
+- **max_prompt / requests_over_100k**: the largest single-request prompt and how many requests went over
+  100,000 prompt tokens. Haiku 5.5 charges 5x per token above that size, so keep surveyor runs under it.
 
 Check on 2026-10-26 (Claude Code 2.1.310, Haiku session with one Explore subagent): kit total $0.01800,
 official `cost.total_cost_usd` $0.01828 (1.6% apart). The official figure includes subagents.

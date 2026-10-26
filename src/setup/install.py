@@ -5,11 +5,15 @@ Plugins cannot set the parent status line, so this script adds:
   subagentStatusLine  -> scripts/usage/subagent_statusline.py
 The log hooks come with the plugin itself (hooks/hooks.json).
 
-Usage:
+Usage (status lines; add --profile for model routing):
   python3 src/setup/install.py                       # ~/.claude/settings.json
   python3 src/setup/install.py --target <file>       # another settings file
   python3 src/setup/install.py --dry-run             # show the change only
-  python3 src/setup/install.py --uninstall           # remove the two entries
+  python3 src/setup/install.py --uninstall           # remove everything this script set
+  python3 src/setup/install.py --profile haiku-subagents   # + every subagent on Haiku
+  python3 src/setup/install.py --profile haiku-all         # + main session on Haiku too
+
+A profile's keys are recorded in <target>.code-survey.json so --uninstall removes only them.
 
 An existing statusLine that is not ours is kept unless --force is given.
 A backup <target>.bak-<timestamp> is written before any change.
@@ -38,6 +42,47 @@ def ours(entry) -> bool:
     return isinstance(entry, dict) and MARK in str(entry.get("command", ""))
 
 
+# Model routing profiles. Measured on 2026-10-26 (Claude Code 2.1.310): with only
+# CLAUDE_CODE_SUBAGENT_MODEL=haiku the built-in Explore still ran on the main model (Sonnet);
+# adding CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1 moved Explore to Haiku as well.
+SUBAGENT_ENV = {"CLAUDE_CODE_SUBAGENT_MODEL": "haiku", "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"}
+PROFILES = {
+    "haiku-subagents": {"env": SUBAGENT_ENV},
+    "haiku-all": {"env": SUBAGENT_ENV, "model": "haiku"},
+}
+
+
+def apply_profile(settings: dict, name: str) -> dict:
+    """Set the profile's keys; return a record of what was set (to undo it later)."""
+    profile = PROFILES[name]
+    record = {"profile": name, "env": {}, "model": None}
+    env = settings.setdefault("env", {})
+    for key, value in profile["env"].items():
+        if key in env and env[key] != value:
+            print(f"note: env {key} was {env[key]!r}, now {value!r}", file=sys.stderr)
+        env[key] = value
+        record["env"][key] = value
+    if "model" in profile:
+        if settings.get("model") not in (None, profile["model"]):
+            print(f"note: model was {settings['model']!r}, now {profile['model']!r}",
+                  file=sys.stderr)
+        settings["model"] = profile["model"]
+        record["model"] = profile["model"]
+    return record
+
+
+def remove_profile(settings: dict, record: dict) -> None:
+    """Undo only the keys this script set that still hold the value it set."""
+    env = settings.get("env") or {}
+    for key, value in (record.get("env") or {}).items():
+        if env.get(key) == value:
+            env.pop(key)
+    if "env" in settings and not settings["env"]:
+        settings.pop("env")
+    if record.get("model") and settings.get("model") == record["model"]:
+        settings.pop("model")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--target", default=str(Path.home() / ".claude" / "settings.json"))
@@ -46,6 +91,11 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--uninstall", action="store_true")
+    parser.add_argument("--profile", choices=sorted(PROFILES),
+                        help="model routing: haiku-subagents (every subagent on Haiku) or "
+                             "haiku-all (main session on Haiku too)")
+    parser.add_argument("--no-statusline", action="store_true",
+                        help="leave statusLine and subagentStatusLine untouched")
     args = parser.parse_args()
 
     target = Path(args.target).expanduser()
@@ -53,11 +103,20 @@ def main() -> int:
     if target.exists():
         settings = json.loads(target.read_text(encoding="utf-8") or "{}")
     before = json.dumps(settings, ensure_ascii=False, indent=2)
+    record_path = target.with_name(target.name + ".code-survey.json")
+    record = json.loads(record_path.read_text(encoding="utf-8")) if record_path.exists() else {}
 
     if args.uninstall:
+        remove_profile(settings, record)
+        record = {}
         for key in ("statusLine", "subagentStatusLine"):
             if ours(settings.get(key)):
                 settings.pop(key)
+    elif args.profile:
+        remove_profile(settings, record)
+        record = apply_profile(settings, args.profile)
+    if args.uninstall or args.no_statusline:
+        pass
     else:
         for key in ("statusLine", "subagentStatusLine"):
             current = settings.get(key)
@@ -86,6 +145,10 @@ def main() -> int:
         print(f"backup: {backup}")
     target.write_text(after + "\n", encoding="utf-8")
     print(f"updated: {target}")
+    if record:
+        record_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    elif record_path.exists() and (args.uninstall or args.profile):
+        record_path.unlink()
     return 0
 
 

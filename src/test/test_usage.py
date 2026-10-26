@@ -122,6 +122,46 @@ class CoreTests(Env):
                                s["main"]["all"]["usd"] + s["sub"]["all"]["usd"], places=6)
 
 
+class PromptSizeTests(unittest.TestCase):
+    def test_max_prompt_and_over_100k(self):
+        rows = [["claude-haiku-5-5", 10, 1, 90_000, 0, 0, "global"],
+                ["claude-haiku-5-5", 10, 1, 95_000, 6_000, 0, "global"]]
+        t = core.totals(PRICING, rows)["all"]
+        self.assertEqual(t["max_prompt"], 101_010)
+        self.assertEqual(t["requests_over_100k"], 1)
+
+
+class NoteCheckTests(unittest.TestCase):
+    SCRIPT = REPO / "src" / "plugin" / "code-survey" / "scripts" / "survey" / "check_note.py"
+
+    def run_check(self, agent, path):
+        payload = {"agent_type": agent, "tool_input": {"file_path": str(path)}}
+        return subprocess.run([sys.executable, str(self.SCRIPT)], input=json.dumps(payload),
+                              capture_output=True, text=True)
+
+    def test_bad_note_is_sent_back_good_note_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            notes = Path(tmp) / "notes"
+            notes.mkdir()
+            bad = notes / "a.json"
+            bad.write_text(json.dumps({"module": "x", "summary": "s", "risks": []}))
+            proc = self.run_check("code-survey:surveyor", bad)
+            self.assertEqual(proc.returncode, 2)
+            self.assertIn("missing key `findings`", proc.stderr)
+            good = notes / "b.json"
+            good.write_text(json.dumps({
+                "module": "x", "summary": "s", "entry_points": [], "dependencies": {},
+                "findings": [{"topic": "t", "detail": "d", "file": "f.py", "line": 3}],
+                "answers": [{"question": "q", "answer": "a",
+                             "evidence": [{"file": "f.py", "line": 3}]}],
+                "open_questions": [], "files_read": ["f.py"]}))
+            self.assertEqual(self.run_check("code-survey:surveyor", good).returncode, 0)
+            # other writers and other files are ignored
+            self.assertEqual(self.run_check("general-purpose", bad).returncode, 0)
+            self.assertEqual(self.run_check("code-survey:surveyor", Path(tmp) / "x.json")
+                             .returncode, 0)
+
+
 class DisplayTests(Env):
     def test_statusline_text_and_snapshot(self):
         payload = {"transcript_path": str(self.transcript), "session_id": "sess1",
@@ -186,7 +226,8 @@ class HookTests(Env):
         self.assertGreater(rec["sub_share"], 0)
         dumped = json.dumps(rec)
         self.assertNotIn("auth 調査", json.dumps(rec["subagent_types"]))
-        self.assertNotIn("prompt", dumped.replace("prompt_input_exit", ""))
+        for text_field in ('"prompt":', '"message":', '"content":', "auth 調査"):
+            self.assertNotIn(text_field, dumped)
 
     def test_bad_input_never_fails(self):
         proc = subprocess.run([sys.executable, str(USAGE / "log_hook.py")], input="not json",
@@ -215,6 +256,26 @@ class InstallTests(unittest.TestCase):
             self.run_install(target, "--uninstall")
             data = json.loads(target.read_text())
             self.assertEqual(data, {"env": {"A": "1"}})
+
+    def test_profile_set_switch_and_undo(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "settings.json"
+            target.write_text(json.dumps({"env": {"A": "1"}}))
+            self.run_install(target, "--profile", "haiku-all", "--no-statusline")
+            data = json.loads(target.read_text())
+            self.assertEqual(data["model"], "haiku")
+            self.assertEqual(data["env"]["CLAUDE_CODE_SUBAGENT_MODEL_FORCE"], "1")
+            self.assertNotIn("statusLine", data)
+            self.run_install(target, "--profile", "haiku-subagents", "--no-statusline")
+            data = json.loads(target.read_text())
+            self.assertNotIn("model", data)
+            self.assertEqual(data["env"]["CLAUDE_CODE_SUBAGENT_MODEL"], "haiku")
+            data["env"]["CLAUDE_CODE_SUBAGENT_MODEL"] = "sonnet"  # user changed it by hand
+            target.write_text(json.dumps(data))
+            self.run_install(target, "--uninstall")
+            data = json.loads(target.read_text())
+            self.assertEqual(data, {"env": {"A": "1", "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"}})
+            self.assertFalse((Path(tmp) / "settings.json.code-survey.json").exists())
 
 
 if __name__ == "__main__":

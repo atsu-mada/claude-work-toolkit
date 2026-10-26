@@ -211,16 +211,22 @@ def family(model: str) -> str:
 def totals(pricing: dict, rows) -> dict:
     """Sum rows into {"models": {model: {...}}, "all": {...}}."""
     def empty():
-        return {"requests": 0, "usd": 0.0, **{k: 0 for k in FIELDS}}
+        return {"requests": 0, "usd": 0.0, **{k: 0 for k in FIELDS},
+                "max_prompt": 0, "requests_over_100k": 0}
     by_model: dict = {}
     overall = empty()
     for row in rows:
         model = row[0]
         bucket = by_model.setdefault(model, empty())
         usd = row_usd(pricing, row)
+        # prompt size of this one request; Haiku 5.5 costs 5x per token above 100k
+        prompt = row[1] + row[3] + row[4] + row[5]
         for target in (bucket, overall):
             target["requests"] += 1
             target["usd"] += usd
+            target["max_prompt"] = max(target["max_prompt"], prompt)
+            if prompt > 100_000:
+                target["requests_over_100k"] += 1
             for i, name in enumerate(FIELDS, start=1):
                 target[name] += row[i]
     for target in list(by_model.values()) + [overall]:
