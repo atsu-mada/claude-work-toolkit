@@ -1,0 +1,8 @@
+{
+  "name": "worktools",
+  "version": "0.6.0",
+  "description": "Claude Code tools for work on a small budget: start modes, Haiku surveyor subagents, a survey skill with an automatic HTML report, a repository layout policy skill, and token / cache-hit logging.",
+  "author": {
+    "name": "claude-work-toolkit"
+  }
+}

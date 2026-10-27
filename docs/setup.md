@@ -5,36 +5,36 @@ Requirements: Claude Code CLI (v2.1.293 or later for `agentType` in subagent row
 ## 1. Get the kit
 
 ```bash
-git clone https://github.com/atsu-mada/code-survey-kit.git ~/code-survey-kit
+git clone https://github.com/atsu-mada/claude-work-toolkit.git ~/claude-work-toolkit
 ```
 
 ## 2. Install the plugin (log hooks)
 
 ```bash
-claude plugin marketplace add ~/code-survey-kit
-claude plugin install code-survey@code-survey-kit
+claude plugin marketplace add ~/claude-work-toolkit
+claude plugin install worktools@claude-work-toolkit
 ```
 
-For a one-off test without installing: `claude --plugin-dir ~/code-survey-kit/src/plugin/code-survey`.
+For a one-off test without installing: `claude --plugin-dir ~/claude-work-toolkit/src/plugin/worktools`.
 
 ## 3. Add the status lines
 
 Plugins cannot set the parent status line, so a script writes it into the settings file:
 
 ```bash
-python3 ~/code-survey-kit/src/setup/install.py --dry-run   # show the change
-python3 ~/code-survey-kit/src/setup/install.py             # write ~/.claude/settings.json (backup first)
+python3 ~/claude-work-toolkit/src/setup/install.py --dry-run   # show the change
+python3 ~/claude-work-toolkit/src/setup/install.py             # write ~/.claude/settings.json (backup first)
 ```
 
 Options: `--target <file>` for another settings file, `--python <path>`, `--refresh <seconds>` (default 5),
 `--force` to replace another status line, `--uninstall` to remove ours.
 The status line scripts run from the cloned folder, so keep it in place.
 
-## 4. Install the `code-survey` command (modes)
+## 4. Install the `worktools` command (modes)
 
 ```bash
-python3 ~/code-survey-kit/src/setup/install.py --launcher --no-statusline   # links ~/.local/bin/code-survey
-code-survey --list
+python3 ~/claude-work-toolkit/src/setup/install.py --launcher --no-statusline   # links ~/.local/bin/worktools
+worktools --list
 ```
 
 | Mode | Aliases | Main session | Subagents | Use for |
@@ -42,20 +42,20 @@ code-survey --list
 | `eco` (エコ) | `c`, `haiku`, `economy` | Haiku | Haiku | most surveys and routine development |
 | `balanced` (バランス) | `b`, `sonnet-haiku`, `standard` | Sonnet | Haiku | design decisions, risky changes, final reviews |
 
-- `code-survey` with no mode asks in the terminal (no default). Without a terminal it exits with code 2.
+- `worktools` with no mode asks in the terminal (no default). Without a terminal it exits with code 2.
 - The mode is passed with `--model` and `--settings` (env `CLAUDE_CODE_SUBAGENT_MODEL`, `..._FORCE=1`,
   `CODE_SURVEY_MODE`), so nothing is written to your settings files. Logs record the mode.
 - Plain `claude` with the plugin: the first prompt is held once and the modes are shown; send it again to
   continue without a mode. `claude -p` without a mode is refused.
-- Rename or add modes in `src/plugin/code-survey/config/modes.json`.
+- Rename or add modes in `src/plugin/worktools/config/modes.json`.
 
 ## 5. Fixed routing without the launcher (optional)
 
 A plugin cannot set environment variables, so the routing goes into a settings file:
 
 ```bash
-python3 ~/code-survey-kit/src/setup/install.py --profile haiku-subagents   # every subagent on Haiku
-python3 ~/code-survey-kit/src/setup/install.py --profile haiku-all         # main session on Haiku too
+python3 ~/claude-work-toolkit/src/setup/install.py --profile haiku-subagents   # every subagent on Haiku
+python3 ~/claude-work-toolkit/src/setup/install.py --profile haiku-all         # main session on Haiku too
 ```
 
 - `haiku-subagents` sets `CLAUDE_CODE_SUBAGENT_MODEL=haiku` and `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`.
@@ -69,13 +69,13 @@ python3 ~/code-survey-kit/src/setup/install.py --profile haiku-all         # mai
 Paste [config/templates/CLAUDE.survey.md](../config/templates/CLAUDE.survey.md) into the CLAUDE.md of the
 repository you survey (or into `~/.claude/CLAUDE.md`).
 
-Then run a survey: `/code-survey:survey` or ask "survey this repository with the code-survey skill".
+Then run a survey: `/worktools:survey` or ask "survey this repository with the worktools skill".
 The result is `survey/<date>/report.html` (one self-contained page; open it in a browser) next to
 `summary.json` and `notes/`. A hook rebuilds the page whenever `summary.json` is written. To rebuild by hand
 or add source links:
 
 ```bash
-python3 ~/code-survey-kit/src/plugin/code-survey/skills/survey/scripts/render_report.py survey/<date> \
+python3 ~/claude-work-toolkit/src/plugin/worktools/skills/survey/scripts/render_report.py survey/<date> \
   --source-url https://github.com/<org>/<repo>/blob/main/
 ```
 

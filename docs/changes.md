@@ -1,6 +1,8 @@
 # 変更内容
 
-code-survey-kit は、利用枠が限られた環境で Claude Code CLI を使い、コードベースを安く調査するためのキットです。
+claude-work-toolkit は、利用枠が限られた会社の環境で Claude Code CLI を使うための道具をまとめたキットです
+（モードを選んだ起動、コードベースの調査と HTML レポート、リポジトリ整理のルール、使用量の表示と記録）。
+2026-10-27 に `code-survey-kit` から名前を変えました。
 この文書は、何をいつ変えたか、なぜ変えたか、使う側が何をすればよいかをまとめます。
 詳しい手順は [setup.md](setup.md)、判断の根拠は [decisions/](decisions/) にあります。
 
@@ -8,7 +10,7 @@ code-survey-kit は、利用枠が限られた環境で Claude Code CLI を使�
 
 | 機能 | 内容 |
 | --- | --- |
-| モードを選んで起動 | `code-survey eco`（全部 Haiku）か `code-survey balanced`（親 Sonnet・子 Haiku）。モード名なしで起動すると、どちらにするか聞かれます |
+| モードを選んで起動 | `worktools eco`（全部 Haiku）か `worktools balanced`（親 Sonnet・子 Haiku）。モード名なしで起動すると、どちらにするか聞かれます |
 | 調査スキル | 親セッションが計画とまとめを担当し、Haiku のサブエージェントがモジュールごとに読んで JSON メモを書きます |
 | HTML レポート | `summary.json` が書かれた時点で `survey/<日付>/report.html` が自動で作られます（モデルのトークンは使いません） |
 | 読みすぎ防止 | サブエージェントは 80k トークンを超えると読むのを止められます。400 行を超えるファイルの丸読みも止められます |
@@ -40,7 +42,7 @@ code-survey-kit は、利用枠が限られた環境で Claude Code CLI を使�
   | 開発のレビュー（20 点満点） | 13 | **16** | 15 |
 
   この規模では Haiku による品質の低下は見えず、費用は 8〜15 分の 1 でした（各 1 回の実行なので、1〜3 点の差は誤差の範囲です）。
-- **追加**：起動時に選ぶ 2 つのモード（`eco` = C、`balanced` = B）と `code-survey` コマンド
+- **追加**：起動時に選ぶ 2 つのモード（`eco` = C、`balanced` = B）と `worktools` コマンド
 - **追加**：モードを選ばずに起動すると、最初の依頼の前にモードを聞きます。`claude -p` でモードがないときは止めます
 
 ### release-20261026-3：調査の歯止め
@@ -63,10 +65,21 @@ code-survey-kit は、利用枠が限られた環境で Claude Code CLI を使�
 - **ルール**：レポートやほかの HTML を作るときは、先に `/awesome-design-skills` を呼びます（CLAUDE.md とテンプレートに記載）
 - **実績**：eco モードの調査 1 回で、レポートまで $0.048、94 秒
 
-### release-20261027-3：repo-layout-policy の同梱
+### release-20261027-3：repo-layout-policy の同梱と名前の変更
+
+- **変更**：キットの名前を `code-survey-kit` から `claude-work-toolkit` に変えました。調査だけでなく、会社の Claude Code で使う道具を幅広く入れるためです
+
+  | | 旧 | 新 |
+  | --- | --- | --- |
+  | GitHub | `atsu-mada/code-survey-kit` | `atsu-mada/claude-work-toolkit`（旧 URL は自動で転送されます） |
+  | プラグイン | `code-survey` | `worktools` |
+  | 起動コマンド | `code-survey eco` | `worktools eco` |
+  | スキルの呼び方 | `/code-survey:survey` | `/worktools:survey` |
+
+  環境変数 `CODE_SURVEY_*`、ログと状態の置き場所（`~/.local/share/code-survey/`、`~/.cache/code-survey/`）は変えていません。これまでの記録はそのまま使えます
 
 - **追加**：`repo-layout-policy` スキルをプラグインに同梱しました。プラグインを入れると一緒に入ります
-  - 呼び方：`/code-survey:repo-layout-policy`（プラグインのスキルなので `code-survey:` が付きます）
+  - 呼び方：`/worktools:repo-layout-policy`（プラグインのスキルなので `worktools:` が付きます）
   - 中身：新しいファイルはルートに置かず、`config/`・`data/`・`docs/`・`src/`・`old/` に置きます。テストは `src/test/` です
 - **理由**：元のスキルは作者の非公開リポジトリにあり、会社の PC から取得できないためです。
   公開する写しからは、作者の個人環境（ノート用の保管庫）向けの例外の段落を外しました
@@ -77,16 +90,16 @@ code-survey-kit は、利用枠が限られた環境で Claude Code CLI を使�
 2. **ステータスラインを設定します**。プラグインだけではステータスラインは出ません
 
    ```bash
-   python3 ~/code-survey-kit/src/setup/install.py --dry-run   # 変更内容を確認
-   python3 ~/code-survey-kit/src/setup/install.py             # ~/.claude/settings.json に書き込み（先にバックアップ）
+   python3 ~/claude-work-toolkit/src/setup/install.py --dry-run   # 変更内容を確認
+   python3 ~/claude-work-toolkit/src/setup/install.py             # ~/.claude/settings.json に書き込み（先にバックアップ）
    ```
 
    書き込むのは `statusLine` と `subagentStatusLine` の 2 つだけです。ほかの設定は残ります。
    2026-10-27 に、この手順を飛ばしたマシンでステータスラインが出ないことを確認しました。実行後に CLI を起動し直すと表示されます。
-3. `code-survey` コマンドを入れます：`python3 ~/code-survey-kit/src/setup/install.py --launcher --no-statusline`
+3. `worktools` コマンドを入れます：`python3 ~/claude-work-toolkit/src/setup/install.py --launcher --no-statusline`
 4. Awesome Design Skill（`/awesome-design-skills`）を入れておきます。HTML を作るときに使います
    （`repo-layout-policy` はプラグインに含まれるので、別に入れる必要はありません）
-5. `code-survey eco` で起動して調査を頼み、`survey/<日付>/report.html` をブラウザで開きます
+5. `worktools eco` で起動して調査を頼み、`survey/<日付>/report.html` をブラウザで開きます
 
 会社のマシンでは、管理者の設定（使えるモデル、フックの許可、Bedrock など）で動きが変わることがあります。
 確認する項目は [setup.md の Company machines](setup.md#company-machines) にあります。

@@ -1,8 +1,0 @@
-{
-  "name": "code-survey",
-  "version": "0.6.0",
-  "description": "Code survey kit: Haiku surveyor subagents, a survey skill with an automatic HTML report, a repository layout policy skill, and token / cache-hit logging.",
-  "author": {
-    "name": "code-survey-kit"
-  }
-}

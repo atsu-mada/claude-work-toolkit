@@ -12,14 +12,14 @@ import unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "src" / "plugin" / "code-survey" / "scripts" / "mode"))
+sys.path.insert(0, str(REPO / "src" / "plugin" / "worktools" / "scripts" / "mode"))
 sys.path.insert(0, str(REPO / "src" / "launcher"))
 
 import modes as mode_lib  # noqa: E402
-import code_survey  # noqa: E402
+import worktools  # noqa: E402
 import session_start  # noqa: E402
 
-LAUNCHER = REPO / "src" / "launcher" / "code_survey.py"
+LAUNCHER = REPO / "src" / "launcher" / "worktools.py"
 
 
 def run(*args, stdin=""):
@@ -65,24 +65,24 @@ class LauncherTests(unittest.TestCase):
     def test_ask_by_number_name_retry_and_cancel(self):
         modes = mode_lib.load()
         out = io.StringIO()
-        self.assertEqual(code_survey.ask(modes, io.StringIO("1\n"), out), "eco")
-        self.assertEqual(code_survey.ask(modes, io.StringIO("b\n"), out), "balanced")
-        self.assertEqual(code_survey.ask(modes, io.StringIO("9\nbalanced\n"), out), "balanced")
-        self.assertIsNone(code_survey.ask(modes, io.StringIO("q\n"), out))
-        self.assertIsNone(code_survey.ask(modes, io.StringIO(""), out))
+        self.assertEqual(worktools.ask(modes, io.StringIO("1\n"), out), "eco")
+        self.assertEqual(worktools.ask(modes, io.StringIO("b\n"), out), "balanced")
+        self.assertEqual(worktools.ask(modes, io.StringIO("9\nbalanced\n"), out), "balanced")
+        self.assertIsNone(worktools.ask(modes, io.StringIO("q\n"), out))
+        self.assertIsNone(worktools.ask(modes, io.StringIO(""), out))
         self.assertIn("1) eco", out.getvalue())
 
 
 class SessionStartTests(unittest.TestCase):
     def test_with_mode(self):
         text = session_start.context({"CODE_SURVEY_MODE": "eco"})
-        self.assertIn("code-survey mode: eco", text)
+        self.assertIn("worktools mode: eco", text)
 
     def test_without_mode_lists_commands(self):
         text = session_start.context({})
         self.assertIn("no mode was chosen", text)
-        self.assertIn("`code-survey eco`", text)
-        self.assertIn("`code-survey balanced`", text)
+        self.assertIn("`worktools eco`", text)
+        self.assertIn("`worktools balanced`", text)
 
 
 class PromptGuardTests(unittest.TestCase):
@@ -103,18 +103,18 @@ class PromptGuardTests(unittest.TestCase):
         for _ in range(2):
             out = self.guard.decide({"session_id": "s"}, env, self.state)
             self.assertEqual(out["decision"], "block")
-            self.assertIn("code-survey balanced", out["reason"])
+            self.assertIn("worktools balanced", out["reason"])
 
     def test_interactive_blocks_once(self):
         env = {"CLAUDE_CODE_ENTRYPOINT": "cli"}
         first = self.guard.decide({"session_id": "s"}, env, self.state)
         self.assertEqual(first["decision"], "block")
-        self.assertIn("code-survey eco", first["reason"])
+        self.assertIn("worktools eco", first["reason"])
         self.assertIsNone(self.guard.decide({"session_id": "s"}, env, self.state))
         self.assertEqual(self.guard.decide({"session_id": "t"}, env, self.state)["decision"], "block")
 
     def test_hook_output_shape(self):
-        script = REPO / "src" / "plugin" / "code-survey" / "scripts" / "mode" / "session_start.py"
+        script = REPO / "src" / "plugin" / "worktools" / "scripts" / "mode" / "session_start.py"
         env = {k: v for k, v in os.environ.items() if k != "CODE_SURVEY_MODE"}
         proc = subprocess.run([sys.executable, str(script)], input="{}", capture_output=True,
                               text=True, env=env)
@@ -131,7 +131,7 @@ class InstallLauncherTests(unittest.TestCase):
             base = [sys.executable, str(REPO / "src" / "setup" / "install.py"), "--target", str(target),
                     "--no-statusline", "--launcher", "--bin-dir", str(bin_dir)]
             subprocess.run(base, capture_output=True, text=True, check=True)
-            link = bin_dir / "code-survey"
+            link = bin_dir / "worktools"
             self.assertEqual(link.resolve(), LAUNCHER.resolve())
             proc = subprocess.run([str(link), "--list"], capture_output=True, text=True)
             self.assertIn("balanced", proc.stdout)
@@ -145,7 +145,7 @@ if __name__ == "__main__":
 
 class StatuslineModeTests(unittest.TestCase):
     def test_mode_shown_first(self):
-        sys.path.insert(0, str(REPO / "src" / "plugin" / "code-survey" / "scripts" / "usage"))
+        sys.path.insert(0, str(REPO / "src" / "plugin" / "worktools" / "scripts" / "usage"))
         import statusline
         old = os.environ.get("CODE_SURVEY_MODE")
         try:
@@ -160,7 +160,7 @@ class StatuslineModeTests(unittest.TestCase):
 
 class ReadBudgetTests(unittest.TestCase):
     def setUp(self):
-        sys.path.insert(0, str(REPO / "src" / "plugin" / "code-survey" / "scripts" / "survey"))
+        sys.path.insert(0, str(REPO / "src" / "plugin" / "worktools" / "scripts" / "survey"))
         import read_budget
         self.rb = read_budget
         self.tmp = tempfile.TemporaryDirectory()
@@ -181,7 +181,7 @@ class ReadBudgetTests(unittest.TestCase):
             "input_tokens": 10, "cache_read_input_tokens": prompt - 10,
             "cache_creation_input_tokens": 0}}}) + "\n")
 
-    def call(self, tool="Grep", agent="code-survey:surveyor", tool_input=None, env=None):
+    def call(self, tool="Grep", agent="worktools:surveyor", tool_input=None, env=None):
         payload = {"agent_id": "a1", "agent_type": agent, "tool_name": tool,
                    "transcript_path": str(self.transcript), "tool_input": tool_input or {}}
         return self.rb.decide(payload, env or {})

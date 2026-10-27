@@ -46,7 +46,7 @@ def cache_part(payload: dict, summary: dict) -> str:
 
 
 def mode_part() -> str:
-    """Mode set by `code-survey <mode>` (CODE_SURVEY_MODE), shown first."""
+    """Mode set by `worktools <mode>` (CODE_SURVEY_MODE), shown first."""
     mode = os.environ.get("CODE_SURVEY_MODE", "").strip()
     return f"[{mode}]" if mode else "[モードなし]"
 
@@ -99,7 +99,7 @@ def main() -> None:
     try:
         print(render(payload))
     except Exception as error:  # never leave the bar blank because of a bug
-        print(f"code-survey: {type(error).__name__}")
+        print(f"worktools: {type(error).__name__}")
 
 
 if __name__ == "__main__":

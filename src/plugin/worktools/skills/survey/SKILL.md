@@ -5,7 +5,7 @@ description: Survey a codebase on a small budget - split it into modules, have t
 
 # Code survey on a small budget
 
-The main session plans and combines. The `code-survey:surveyor` subagent (Haiku) does all the reading.
+The main session plans and combines. The `worktools:surveyor` subagent (Haiku) does all the reading.
 Never read source files in the main session beyond a quick look at the top-level layout.
 
 ## 1. Plan (main session)
@@ -24,7 +24,7 @@ Delegation costs a fresh start for every subagent and only pays off when there i
 
 ## 2. Read (subagents)
 
-For each module, call `code-survey:surveyor` with:
+For each module, call `worktools:surveyor` with:
 
 ```
 module: <path>
@@ -36,7 +36,7 @@ language: <the language the user writes in, e.g. Japanese>
 
 - Run independent modules in parallel, at most 4 at a time.
 - Do not pass a model; the agent definition sets Haiku.
-- Use `code-survey:locator` for single "where is X" lookups.
+- Use `worktools:locator` for single "where is X" lookups.
 - Keep each subagent's reply out of your own reasoning beyond its 5-line summary. Open a note file only
   when you need a specific detail.
 

@@ -5,7 +5,7 @@ description: Enforce repository layout and file-placement policy to minimize roo
 
 # Repo Layout Policy
 
-<!-- Public copy bundled with code-survey-kit. Source: the author's private skill library, without its personal-vault exception. -->
+<!-- Public copy bundled with claude-work-toolkit. Source: the author's private skill library, without its personal-vault exception. -->
 
 ## Objective
 - Keep repositories organized by default.
