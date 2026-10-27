@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-SCRIPT = REPO / "src" / "plugin" / "code-survey" / "skills" / "survey" / "scripts" / "render_report.py"
+SCRIPT = REPO / "src" / "plugin" / "worktools" / "skills" / "survey" / "scripts" / "render_report.py"
 sys.path.insert(0, str(SCRIPT.parent))
 import render_report as rr  # noqa: E402
 
@@ -92,7 +92,7 @@ class CliTests(unittest.TestCase):
 
 
 class AutoReportTests(unittest.TestCase):
-    HOOK = REPO / "src" / "plugin" / "code-survey" / "scripts" / "survey" / "auto_report.py"
+    HOOK = REPO / "src" / "plugin" / "worktools" / "scripts" / "survey" / "auto_report.py"
 
     def run_hook(self, path):
         payload = {"tool_name": "Write", "tool_input": {"file_path": str(path)}}

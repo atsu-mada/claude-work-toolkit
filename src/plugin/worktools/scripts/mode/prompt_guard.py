@@ -1,10 +1,10 @@
 """UserPromptSubmit hook: make sure a mode was chosen before any work starts.
 
 The SessionStart text alone was ignored by Haiku in a test, so this hook enforces it:
-- mode set (started with `code-survey <mode>`): do nothing
+- mode set (started with `worktools <mode>`): do nothing
 - non-interactive run (`claude -p`): block every prompt and name the commands to use
 - interactive run: block the first prompt once and show the modes; the user restarts with
-  `code-survey <mode>`, or sends the prompt again to continue without a mode
+  `worktools <mode>`, or sends the prompt again to continue without a mode
 
 Non-interactive is detected from CLAUDE_CODE_ENTRYPOINT (sdk-*) or CLAUDE_CODE_SESSION_ATTENDED=0,
 observed on Claude Code 2.1.310; both are undocumented, so anything else counts as interactive.
@@ -27,7 +27,7 @@ def non_interactive(env: dict) -> bool:
 
 
 def menu(modes: dict) -> str:
-    return "\n".join(f"  code-survey {name:<9} … {spec['title']}" for name, spec in modes.items())
+    return "\n".join(f"  worktools {name:<9} … {spec['title']}" for name, spec in modes.items())
 
 
 def decide(payload: dict, env: dict, state_dir: Path):
@@ -37,7 +37,7 @@ def decide(payload: dict, env: dict, state_dir: Path):
         return None
     if non_interactive(env):
         return {"decision": "block",
-                "reason": "code-survey: モードが指定されていません / no mode given.\n"
+                "reason": "worktools: モードが指定されていません / no mode given.\n"
                           f"次のどちらかで実行してください:\n{menu(modes)}"}
     marker = state_dir / f"{payload.get('session_id') or 'unknown'}.mode-asked"
     if marker.exists():
@@ -48,7 +48,7 @@ def decide(payload: dict, env: dict, state_dir: Path):
     except OSError:
         return None  # cannot remember the question: do not block forever
     return {"decision": "block",
-            "reason": "code-survey: モードを選んでください / choose a mode.\n"
+            "reason": "worktools: モードを選んでください / choose a mode.\n"
                       f"{menu(modes)}\n"
                       "モデルは起動時に決まるので、/exit してから上のどちらかで起動し直してください。\n"
                       "モードなしで続けるなら、同じ依頼をもう一度送ってください。"}

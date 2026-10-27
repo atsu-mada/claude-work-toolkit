@@ -1,4 +1,4 @@
-"""Model modes of code-survey-kit (defined in config/modes.json).
+"""Model modes of claude-work-toolkit (defined in config/modes.json).
 
 A mode fixes the main model and the subagent model for a whole session. It is chosen at start because
 changing models mid-session rebuilds the prompt cache, and the subagent model cannot change mid-session.

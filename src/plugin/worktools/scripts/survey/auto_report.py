@@ -29,9 +29,9 @@ def main() -> None:
         summary, notes = render_report.load_survey(path.parent)
         out = path.parent / "report.html"
         out.write_text(render_report.render(summary, notes), encoding="utf-8")
-        message = f"code-survey: HTML report written to {out} ({len(notes)} modules). Give this path to the user."
+        message = f"worktools: HTML report written to {out} ({len(notes)} modules). Give this path to the user."
     except Exception as error:
-        message = f"code-survey: building report.html failed ({type(error).__name__}: {error})."
+        message = f"worktools: building report.html failed ({type(error).__name__}: {error})."
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PostToolUse",
                                              "additionalContext": message}}))
     sys.exit(0)

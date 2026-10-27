@@ -26,7 +26,7 @@ export CODE_SURVEY_STATE_DIR=$OUT/state CODE_SURVEY_LOG_DIR=$OUT/logs
 # survey
 SURVEY_PROMPT=$(sed "s|OUTDIR|$OUT/survey|g" "$KIT/src/eval/survey_task.md")
 (cd "$TARGET" && CODE_SURVEY_LABEL=survey-$CFG claude -p --model $MAIN --settings "$SETTINGS" \
-  --plugin-dir "$KIT/src/plugin/code-survey" --add-dir "$OUT/survey" \
+  --plugin-dir "$KIT/src/plugin/worktools" --add-dir "$OUT/survey" \
   --allowedTools "Agent,Glob,Grep,Read,Write($OUT/survey/**),Bash(git ls-files*),Bash(python3 *),Skill" \
   --output-format json "$SURVEY_PROMPT" > "$OUT/survey_result.json" 2> "$OUT/survey_stderr.txt")
 
@@ -35,7 +35,7 @@ SURVEY_PROMPT=$(sed "s|OUTDIR|$OUT/survey|g" "$KIT/src/eval/survey_task.md")
 git clone -q --branch develop "$KIT" "$OUT/dev-repo"
 cp "$KIT/src/eval/dev_task/SPEC.md" "$OUT/dev-repo/TASK.md"
 (cd "$OUT/dev-repo" && CODE_SURVEY_LABEL=dev-$CFG claude -p --model $MAIN --settings "$SETTINGS" \
-  --plugin-dir "$KIT/src/plugin/code-survey" --permission-mode acceptEdits \
+  --plugin-dir "$KIT/src/plugin/worktools" --permission-mode acceptEdits \
   --allowedTools "Agent,Glob,Grep,Read,Edit,Write,Bash(python3 *),Bash(ls *)" \
   --output-format json "Implement the task described in TASK.md. Run your tests before you finish. Do not commit." \
   > "$OUT/dev_result.json" 2> "$OUT/dev_stderr.txt")
