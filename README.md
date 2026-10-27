@@ -37,6 +37,7 @@ Install the log hooks (Claude Code 2.1.275 or later):
 
 Then add the status lines with `src/setup/install.py`.
 
+- Changes by release (Japanese): [docs/changes.md](docs/changes.md)
 - Setup: [docs/setup.md](docs/setup.md)
 - What is measured and how: [docs/metrics.md](docs/metrics.md)
 - Why Haiku is routed this way (measurements): [docs/decisions/2026-10-26_haiku-routing.md](docs/decisions/2026-10-26_haiku-routing.md)
