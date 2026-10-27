@@ -1,8 +1,8 @@
-"""SessionStart hook: tell Claude which code-survey mode is active, or to ask for one.
+"""SessionStart hook: tell Claude which worktools mode is active, or to ask for one.
 
-`code-survey <mode>` sets CODE_SURVEY_MODE. When it is missing (plain `claude`), Claude is told to ask
+`worktools <mode>` sets CODE_SURVEY_MODE. When it is missing (plain `claude`), Claude is told to ask
 the user which mode to use before any survey or development work, and to have them restart with
-`code-survey <mode>`, since the models are fixed when a session starts.
+`worktools <mode>`, since the models are fixed when a session starts.
 """
 
 from __future__ import annotations
@@ -21,12 +21,12 @@ def context(env: dict) -> str:
     mode = mode_lib.resolve(env.get(mode_lib.ENV_MODE, ""), modes)
     if mode:
         spec = modes[mode]
-        return (f"code-survey mode: {mode} ({spec['title']}). Main model {spec['model']}, every "
+        return (f"worktools mode: {mode} ({spec['title']}). Main model {spec['model']}, every "
                 f"subagent {spec['subagent_model']}. Do not switch models during this session.")
-    lines = "\n".join(f"- {name}: {spec['title']}. {spec['summary']} Start: `code-survey {name}`"
+    lines = "\n".join(f"- {name}: {spec['title']}. {spec['summary']} Start: `worktools {name}`"
                       for name, spec in modes.items())
     return (
-        "code-survey: no mode was chosen for this session. The prompt hook shows the user these modes "
+        "worktools: no mode was chosen for this session. The prompt hook shows the user these modes "
         "before the first prompt:\n"
         f"{lines}\n"
         "If the user continues without a mode, work normally; do not ask again. If they ask how to "

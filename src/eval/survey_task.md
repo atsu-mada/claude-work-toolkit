@@ -1,4 +1,4 @@
-Survey the repository in the current directory with the `code-survey:survey` skill.
+Survey the repository in the current directory with the `worktools:survey` skill.
 Do NOT re-plan the modules: use exactly these three modules, slugs, and questions.
 
 1. slug `core`, module `src/core/`

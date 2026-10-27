@@ -6,7 +6,7 @@ Use the Python standard library only. Python 3.9+ syntax.
 ## Input
 
 A JSON Lines file written by `log_hook.py` (`sessions.jsonl`). Each line is one session record with at
-least these keys (see `src/plugin/code-survey/scripts/usage/log_hook.py`):
+least these keys (see `src/plugin/worktools/scripts/usage/log_hook.py`):
 `session_id` (str), `label` (str, may be empty), `total.all.usd` (float),
 `main.all.hit_rate` (float or null), `sub_share` (float or null), `total.all.requests_over_100k` (int,
 may be missing in old records: treat as 0). Blank lines and lines that are not valid JSON are skipped.

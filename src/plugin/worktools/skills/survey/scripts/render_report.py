@@ -296,7 +296,7 @@ def render(summary: dict, notes: list, source_url: str = "", title: str = "") ->
             f'<input id="filter" type="search" placeholder="発見と回答を絞り込む" aria-label="絞り込み"></nav>'
             + stats(summary, notes) + overview(summary, notes, ctx)
             + "".join(module_section(n, ctx) for n in notes)
-            + f'<footer>code-survey-kit で作成 · {len(notes)} モジュール · '
+            + f'<footer>claude-work-toolkit で作成 · {len(notes)} モジュール · '
               f'{datetime.now().strftime("%Y-%m-%d %H:%M")}</footer>')
     return ("<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\">"
             "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"

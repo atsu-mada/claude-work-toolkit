@@ -1,4 +1,4 @@
-"""Write the status line settings of code-survey-kit into a Claude Code settings file.
+"""Write the status line settings of claude-work-toolkit into a Claude Code settings file.
 
 Plugins cannot set the parent status line, so this script adds:
   statusLine          -> scripts/usage/statusline.py   (refreshes every N seconds)
@@ -31,8 +31,8 @@ import time
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-SCRIPTS = REPO / "src" / "plugin" / "code-survey" / "scripts" / "usage"
-MARK = "code-survey"
+SCRIPTS = REPO / "src" / "plugin" / "worktools" / "scripts" / "usage"
+MARKS = ("worktools", "code-survey")  # current name, and the name before 2026-10-27
 
 
 def command(python: str, script: str) -> str:
@@ -40,7 +40,7 @@ def command(python: str, script: str) -> str:
 
 
 def ours(entry) -> bool:
-    return isinstance(entry, dict) and MARK in str(entry.get("command", ""))
+    return isinstance(entry, dict) and any(mark in str(entry.get("command", "")) for mark in MARKS)
 
 
 # Model routing profiles. Measured on 2026-10-26 (Claude Code 2.1.310): with only
@@ -53,12 +53,12 @@ PROFILES = {
 }
 
 
-LAUNCHER = REPO / "src" / "launcher" / "code_survey.py"
+LAUNCHER = REPO / "src" / "launcher" / "worktools.py"
 
 
 def link_launcher(bin_dir: Path, dry_run: bool, uninstall: bool) -> None:
-    """Symlink <bin_dir>/code-survey to the launcher script (or remove our link)."""
-    link = bin_dir / "code-survey"
+    """Symlink <bin_dir>/worktools to the launcher script (or remove our link)."""
+    link = bin_dir / "worktools"
     if uninstall:
         if link.is_symlink() and link.resolve() == LAUNCHER.resolve():
             if not dry_run:
@@ -79,7 +79,7 @@ def link_launcher(bin_dir: Path, dry_run: bool, uninstall: bool) -> None:
     link.symlink_to(LAUNCHER)
     print(f"linked: {link} -> {LAUNCHER}")
     if str(bin_dir) not in os.environ.get("PATH", "").split(os.pathsep):
-        print(f"note: add {bin_dir} to PATH to run `code-survey`", file=sys.stderr)
+        print(f"note: add {bin_dir} to PATH to run `worktools`", file=sys.stderr)
 
 
 def apply_profile(settings: dict, name: str) -> dict:
@@ -127,7 +127,7 @@ def main() -> int:
     parser.add_argument("--no-statusline", action="store_true",
                         help="leave statusLine and subagentStatusLine untouched")
     parser.add_argument("--launcher", action="store_true",
-                        help="link the `code-survey` command into --bin-dir")
+                        help="link the `worktools` command into --bin-dir")
     parser.add_argument("--bin-dir", default=str(Path.home() / ".local" / "bin"))
     args = parser.parse_args()
 

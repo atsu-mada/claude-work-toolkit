@@ -13,7 +13,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-USAGE = REPO / "src" / "plugin" / "code-survey" / "scripts" / "usage"
+USAGE = REPO / "src" / "plugin" / "worktools" / "scripts" / "usage"
 sys.path.insert(0, str(USAGE))
 
 import usage_core as core  # noqa: E402
@@ -132,7 +132,7 @@ class PromptSizeTests(unittest.TestCase):
 
 
 class NoteCheckTests(unittest.TestCase):
-    SCRIPT = REPO / "src" / "plugin" / "code-survey" / "scripts" / "survey" / "check_note.py"
+    SCRIPT = REPO / "src" / "plugin" / "worktools" / "scripts" / "survey" / "check_note.py"
 
     def run_check(self, agent, path):
         payload = {"agent_type": agent, "tool_input": {"file_path": str(path)}}
@@ -145,7 +145,7 @@ class NoteCheckTests(unittest.TestCase):
             notes.mkdir()
             bad = notes / "a.json"
             bad.write_text(json.dumps({"module": "x", "summary": "s", "risks": []}))
-            proc = self.run_check("code-survey:surveyor", bad)
+            proc = self.run_check("worktools:surveyor", bad)
             self.assertEqual(proc.returncode, 2)
             self.assertIn("missing key `findings`", proc.stderr)
             good = notes / "b.json"
@@ -155,10 +155,10 @@ class NoteCheckTests(unittest.TestCase):
                 "answers": [{"question": "q", "answer": "a",
                              "evidence": [{"file": "f.py", "line": 3}]}],
                 "open_questions": [], "files_read": ["f.py"]}))
-            self.assertEqual(self.run_check("code-survey:surveyor", good).returncode, 0)
+            self.assertEqual(self.run_check("worktools:surveyor", good).returncode, 0)
             # other writers and other files are ignored
             self.assertEqual(self.run_check("general-purpose", bad).returncode, 0)
-            self.assertEqual(self.run_check("code-survey:surveyor", Path(tmp) / "x.json")
+            self.assertEqual(self.run_check("worktools:surveyor", Path(tmp) / "x.json")
                              .returncode, 0)
 
 

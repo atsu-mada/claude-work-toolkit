@@ -1,14 +1,14 @@
 {
-  "name": "code-survey-kit",
+  "name": "claude-work-toolkit",
   "owner": {
-    "name": "code-survey-kit"
+    "name": "claude-work-toolkit"
   },
-  "description": "Claude Code CLI kit for low-cost code surveys: Haiku subagents and token / cache-hit logging.",
+  "description": "Claude Code CLI tools for work on a small budget: start modes, low-cost code surveys with an HTML report, a repository layout policy, and token / cache-hit logging.",
   "plugins": [
     {
-      "name": "code-survey",
-      "source": "./src/plugin/code-survey",
-      "description": "Haiku survey subagents and skill, plus usage logging (tokens, cache hit rate, API-equivalent cost)."
+      "name": "worktools",
+      "source": "./src/plugin/worktools",
+      "description": "Start modes, Haiku survey subagents and skill, repository layout policy, plus usage display and logging (tokens, cache hit rate, API-equivalent cost)."
     }
   ]
 }

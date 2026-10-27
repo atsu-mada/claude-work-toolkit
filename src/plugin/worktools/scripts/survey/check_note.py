@@ -1,6 +1,6 @@
 """PostToolUse hook: check a survey note written by the surveyor subagent.
 
-Runs after Write. Acts only when the writer is the code-survey surveyor and the file is a
+Runs after Write. Acts only when the writer is the worktools surveyor and the file is a
 JSON note under a `notes/` folder. If the note is not valid JSON or lacks required keys,
 exit code 2 sends the problem back to the subagent so it rewrites the note. A valid note
 costs no tokens. Never blocks anything else.
